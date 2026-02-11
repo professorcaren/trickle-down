@@ -689,7 +689,7 @@ function drawLevers() {
 function drawParticles() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 56px Chivo";
+  ctx.font = "bold 48px Chivo";
   for (const p of state.particles) {
     ctx.save();
     ctx.translate(p.x, p.y);
@@ -728,12 +728,12 @@ function closeRulesModal() {
 
 function drawBinStack() {
   const binWidth = W / BIN_COUNT;
-  const spacing = 20;
+  const spacing = 22;
   const cols = Math.floor((binWidth - 8) / spacing);
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 20px Chivo";
+  ctx.font = "bold 32px Chivo";
 
   for (let i = 0; i < BIN_COUNT; i += 1) {
     const count = state.counts[i];
