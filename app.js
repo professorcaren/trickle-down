@@ -178,10 +178,10 @@ function seedBoard() {
   state.pegs = [];
   state.levers = [];
 
-  const startY = 120;
-  const rowGap = 62;
+  const startY = 80;
+  const rowGap = 68;
   const colGap = 86;
-  for (let row = 0; row < 7; row += 1) {
+  for (let row = 0; row < 16; row += 1) {
     const y = startY + row * rowGap;
     const offset = row % 2 === 0 ? 72 : 114;
     for (let x = offset; x < W - 56; x += colGap) {
@@ -711,12 +711,6 @@ function drawBins() {
   }
 
   ctx.strokeStyle = "rgba(51, 65, 85, 0.5)";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(0, yTop);
-  ctx.lineTo(W, yTop);
-  ctx.stroke();
-
   ctx.lineWidth = 3;
   for (let i = 1; i < BIN_COUNT; i += 1) {
     const x = i * binWidth;
@@ -725,6 +719,12 @@ function drawBins() {
     ctx.lineTo(x, H);
     ctx.stroke();
   }
+
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, H - 2);
+  ctx.lineTo(W, H - 2);
+  ctx.stroke();
 
 }
 
@@ -774,7 +774,7 @@ function drawLevers() {
 function drawParticles() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 14px Chivo";
+  ctx.font = "bold 22px Chivo";
   for (const p of state.particles) {
     ctx.save();
     ctx.translate(p.x, p.y);
@@ -811,9 +811,37 @@ function closeRulesModal() {
   rulesModal.hidden = true;
 }
 
+function drawBinStack() {
+  const binWidth = W / BIN_COUNT;
+  const spacing = 16;
+  const cols = Math.floor((binWidth - 8) / spacing);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 14px Chivo";
+
+  for (let i = 0; i < BIN_COUNT; i += 1) {
+    const count = state.counts[i];
+    if (count === 0) continue;
+    const colorId = binColorOrder[i];
+    ctx.fillStyle = colorGroups[colorId].hex;
+    const binLeft = i * binWidth + (binWidth - cols * spacing) / 2;
+
+    for (let j = 0; j < count; j += 1) {
+      const col = j % cols;
+      const row = Math.floor(j / cols);
+      const x = binLeft + col * spacing + spacing / 2;
+      const y = H - 8 - row * spacing;
+      if (y < H - BIN_HEIGHT + 10) break;
+      ctx.fillText("$", x, y);
+    }
+  }
+}
+
 function draw() {
   drawBackground();
   drawBins();
+  drawBinStack();
   drawPegs();
   drawLevers();
   drawParticles();
