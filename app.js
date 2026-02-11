@@ -7,7 +7,6 @@ const statusText = document.getElementById("statusText");
 const modeDescription = document.getElementById("modeDescription");
 const barsEl = document.getElementById("bars");
 const pauseBtn = document.getElementById("pauseBtn");
-const playingHud = document.getElementById("playingHud");
 const pausedStats = document.getElementById("pausedStats");
 const statsContent = document.getElementById("statsContent");
 const pressMenu = document.getElementById("pressMenu");
@@ -51,7 +50,7 @@ const colorGroups = {
 };
 
 const colorIds = Object.keys(colorGroups);
-const binColorOrder = ["purple", "blue", "green", "red", "orange"];
+const binColorOrder = ["orange", "red", "green", "blue", "purple"];
 const BIN_COUNT = binColorOrder.length;
 
 const targets = {
@@ -955,12 +954,15 @@ function openModeMenu() {
 
 function renderPausedStats() {
   const metrics = computeMetrics();
-  let html = '<div class="stats-grid">';
+  const hasTarget = !!metrics.targetByColor;
+  let html = '<div class="stats-card">';
+  html += '<div class="stats-grid">';
+  html += `<div class="stats-header"><span>Group</span><span>Current</span>${hasTarget ? "<span>Target</span><span>Diff</span>" : ""}</div>`;
   binColorOrder.forEach((colorId) => {
     const current = metrics.currentByColor[colorId];
     const swatch = `<span class="swatch" style="background:${colorGroups[colorId].hex}"></span>`;
     let targetInfo = "";
-    if (metrics.targetByColor) {
+    if (hasTarget) {
       const target = metrics.targetByColor[colorId];
       const diff = current - target;
       const sign = diff >= 0 ? "+" : "";
@@ -974,6 +976,7 @@ function renderPausedStats() {
     html += `<p class="stats-score">Score: ${metrics.score}/100</p>`;
   }
   html += `<p class="stats-note">Based on last ${metrics.windowCount} balls</p>`;
+  html += "</div>";
   statsContent.innerHTML = html;
 }
 
@@ -982,13 +985,11 @@ function togglePause() {
   if (state.paused) {
     pauseBtn.textContent = "Resume";
     pauseBtn.classList.add("is-paused");
-    playingHud.hidden = true;
     pausedStats.hidden = false;
     renderPausedStats();
   } else {
     pauseBtn.textContent = "Pause";
     pauseBtn.classList.remove("is-paused");
-    playingHud.hidden = false;
     pausedStats.hidden = true;
   }
 }

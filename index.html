@@ -22,14 +22,14 @@
       </header>
       <div class="canvas-shell">
         <canvas id="gameCanvas" aria-label="Income distribution plinko game"></canvas>
+        <div id="pausedStats" class="paused-overlay" hidden>
+          <div id="statsContent"></div>
+        </div>
       </div>
       <section class="card results-card">
         <div id="playingHud">
           <div id="bars" class="bars"></div>
           <p id="statusText" class="status"></p>
-        </div>
-        <div id="pausedStats" class="paused-stats" hidden>
-          <div id="statsContent"></div>
         </div>
         <button id="pauseBtn" class="pause-btn">Pause</button>
       </section>
