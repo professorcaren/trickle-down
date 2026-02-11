@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Income Plinko Lab</title>
+  <title>Income Drop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Chivo:wght@400;700&display=swap" rel="stylesheet">
@@ -13,11 +13,7 @@
   <main class="layout">
     <section class="board-wrap">
       <header class="title-block">
-        <div class="title-row">
-          <span class="icon-btn-spacer"></span>
-          <h1>Income Plinko Lab</h1>
-          <button id="boardMenuBtn" class="icon-btn" aria-label="Game options">...</button>
-        </div>
+        <h1>Income Drop</h1>
       </header>
       <div class="canvas-shell">
         <canvas id="gameCanvas" aria-label="Income distribution plinko game"></canvas>
@@ -31,6 +27,10 @@
           <p id="statusText" class="status"></p>
         </div>
         <button id="pauseBtn" class="pause-btn">Pause</button>
+        <div id="pausedActions" class="paused-actions" hidden>
+          <button id="resumeBtn" class="action-btn resume-btn">Resume</button>
+          <button id="restartBtn" class="action-btn restart-btn">Restart</button>
+        </div>
       </section>
     </section>
   </main>

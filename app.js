@@ -1,10 +1,12 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const boardMenuBtn = document.getElementById("boardMenuBtn");
 const statusText = document.getElementById("statusText");
 const barsEl = document.getElementById("bars");
 const pauseBtn = document.getElementById("pauseBtn");
+const pausedActions = document.getElementById("pausedActions");
+const resumeBtn = document.getElementById("resumeBtn");
+const restartBtn = document.getElementById("restartBtn");
 const pausedStats = document.getElementById("pausedStats");
 const statsContent = document.getElementById("statsContent");
 const pressMenu = document.getElementById("pressMenu");
@@ -243,13 +245,6 @@ function resetMenuSheetPosition() {
 }
 
 function buildMenuActions(context) {
-  if (context.kind === "game-options") {
-    return [
-      { id: "show-help", label: "Help" },
-      { id: "reset-samples", label: "Reset Samples" },
-      { id: "reset-board", label: "Reset Board" },
-    ];
-  }
   if (context.leverIndex >= 0) return [{ id: "delete-lever", label: "Delete Lever" }];
   if (context.pegIndex >= 0) return [{ id: "delete-peg", label: "Delete Peg" }];
   return [
@@ -299,30 +294,9 @@ function openBoardPointMenu(clientX, clientY, boardX, boardY, leverIndex, pegInd
   openMenu(context, onObject ? "Object Actions" : "Board Actions", clientX, clientY);
 }
 
-function openGameOptionsMenu() {
-  const rect = boardMenuBtn.getBoundingClientRect();
-  const context = { kind: "game-options" };
-  openMenu(context, "Game Options", rect.left + rect.width * 0.5, rect.bottom + 4);
-}
-
 function applyMenuAction(actionId) {
   if (!state.menuContext) return;
   const context = state.menuContext;
-
-  if (actionId === "show-help") {
-    openRulesModal(false);
-    return;
-  }
-
-  if (actionId === "reset-samples") {
-    resetCounts();
-    return;
-  }
-
-  if (actionId === "reset-board") {
-    seedBoard();
-    return;
-  }
 
   if (context.kind !== "board-point") return;
   if (actionId === "add-peg") addPeg(context.x, context.y);
@@ -526,20 +500,34 @@ function computeMetrics() {
   };
 }
 
+function getScoreMessage(score) {
+  if (score >= 97) return "Perfection!";
+  if (score >= 93) return "So close to perfect!";
+  if (score >= 88) return "Dialed in!";
+  if (score >= 83) return "Almost there, tiny tweaks!";
+  if (score >= 78) return "Really solid setup!";
+  if (score >= 72) return "Getting warm!";
+  if (score >= 65) return "On the right track.";
+  if (score >= 55) return "Making progress, keep experimenting.";
+  if (score >= 45) return "Check which bins are off.";
+  if (score >= 35) return "Try angling some levers.";
+  if (score >= 25) return "The dollars aren't cooperating yet.";
+  if (score >= 15) return "Big gaps \u2014 rethink your strategy!";
+  return "Wild ride! Try adding some levers.";
+}
+
+function getScoreColor(score) {
+  if (score >= 88) return "#16a34a";
+  if (score >= 72) return "#0ea5e9";
+  if (score >= 45) return "#f59e0b";
+  return "#ef4444";
+}
+
 function updateHud() {
   const metrics = computeMetrics();
   renderStackRow(state.barRefs.currentTrack, metrics.currentByColor, "Current");
-
-  if (metrics.score >= 92) {
-    statusText.textContent = `Score: ${metrics.score} -- on target!`;
-    statusText.style.color = "#16a34a";
-  } else if (metrics.score >= 80) {
-    statusText.textContent = `Score: ${metrics.score} -- close, keep tuning.`;
-    statusText.style.color = "#0ea5e9";
-  } else {
-    statusText.textContent = `Score: ${metrics.score} -- needs work.`;
-    statusText.style.color = "#ef4444";
-  }
+  statusText.textContent = `Score: ${metrics.score} \u2014 ${getScoreMessage(metrics.score)}`;
+  statusText.style.color = getScoreColor(metrics.score);
 }
 
 function update(dt) {
@@ -925,31 +913,39 @@ function renderPausedStats() {
   html += "</div>";
   html += `<p class="stats-score">Score: ${metrics.score}/100</p>`;
   html += `<p class="stats-note">Based on last ${metrics.windowCount} balls</p>`;
+  html += '<p class="stats-note"><a href="#" id="statsHelpLink" style="color:#6366f1">How to play</a></p>';
   html += "</div>";
   statsContent.innerHTML = html;
+  statsContent.querySelector("#statsHelpLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    openRulesModal(false);
+  });
 }
 
-function togglePause() {
-  state.paused = !state.paused;
+function setPaused(paused) {
+  state.paused = paused;
   if (state.paused) {
-    pauseBtn.textContent = "Resume";
-    pauseBtn.classList.add("is-paused");
+    pauseBtn.hidden = true;
+    pausedActions.hidden = false;
     pausedStats.hidden = false;
     renderPausedStats();
   } else {
-    pauseBtn.textContent = "Pause";
-    pauseBtn.classList.remove("is-paused");
+    pauseBtn.hidden = false;
+    pausedActions.hidden = true;
     pausedStats.hidden = true;
   }
 }
 
-pauseBtn.addEventListener("click", togglePause);
+function restart() {
+  seedBoard();
+  resetCounts();
+  state.particles = [];
+  setPaused(false);
+}
 
-boardMenuBtn.addEventListener("click", () => {
-  hidePressMenu();
-  resetMenuSheetPosition();
-  openGameOptionsMenu();
-});
+pauseBtn.addEventListener("click", () => setPaused(true));
+resumeBtn.addEventListener("click", () => setPaused(false));
+restartBtn.addEventListener("click", restart);
 
 pressMenuCancel.addEventListener("click", () => {
   hidePressMenu();
