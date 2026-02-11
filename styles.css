@@ -370,7 +370,7 @@ h2 {
 }
 
 .stats-current { font-weight: 700; }
-.stats-target { color: #64748b; }
+.stats-target { font-weight: 700; color: #1e293b; }
 
 .stats-diff {
   font-weight: 700;

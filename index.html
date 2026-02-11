@@ -14,11 +14,9 @@
     <section class="board-wrap">
       <header class="title-block">
         <div class="title-row">
-          <button id="modeMenuBtn" class="icon-btn" aria-label="Target mode">&#9776;</button>
           <h1>Income Plinko Lab</h1>
           <button id="boardMenuBtn" class="icon-btn" aria-label="Game options">...</button>
         </div>
-        <p id="modeDescription" class="small center"></p>
       </header>
       <div class="canvas-shell">
         <canvas id="gameCanvas" aria-label="Income distribution plinko game"></canvas>
@@ -47,13 +45,13 @@
   <div id="rulesModal" class="rules-modal" hidden>
     <div class="rules-sheet" role="dialog" aria-modal="true" aria-label="How to play">
       <h2>How To Play</h2>
-      <p>Build a stable funnel system that matches the selected target distribution.</p>
+      <p>Build a funnel system that matches the target income distribution.</p>
       <ul class="rules-list">
         <li>Drag on blank space to draw a lever.</li>
         <li>Drag lever body to move, drag lever ends to rotate.</li>
         <li>Long-press or right-click to add/delete pegs and levers.</li>
         <li>Score uses only the last 100 balls, so consistency matters.</li>
-        <li>Use Free Play to experiment with no target.</li>
+        <li>Pause to see how your distribution compares to the target.</li>
       </ul>
       <button id="rulesCloseBtn" class="rules-close">Start</button>
     </div>

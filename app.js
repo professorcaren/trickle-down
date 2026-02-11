@@ -1,10 +1,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const modeMenuBtn = document.getElementById("modeMenuBtn");
 const boardMenuBtn = document.getElementById("boardMenuBtn");
 const statusText = document.getElementById("statusText");
-const modeDescription = document.getElementById("modeDescription");
 const barsEl = document.getElementById("bars");
 const pauseBtn = document.getElementById("pauseBtn");
 const pausedStats = document.getElementById("pausedStats");
@@ -42,32 +40,20 @@ const SCORE_WINDOW = 100;
 const RULES_SEEN_KEY = "income_plinko_rules_seen_v1";
 
 const colorGroups = {
-  purple: { name: "Purple", hex: "#a855f7" },
-  blue: { name: "Blue", hex: "#3b82f6" },
-  green: { name: "Green", hex: "#22c55e" },
-  red: { name: "Red", hex: "#ef4444" },
-  orange: { name: "Orange", hex: "#f97316" },
+  purple: { name: "Purple", label: "80-100%", hex: "#a855f7" },
+  blue: { name: "Blue", label: "60-80%", hex: "#3b82f6" },
+  green: { name: "Green", label: "40-60%", hex: "#22c55e" },
+  red: { name: "Red", label: "20-40%", hex: "#ef4444" },
+  orange: { name: "Orange", label: "0-20%", hex: "#f97316" },
 };
 
 const colorIds = Object.keys(colorGroups);
 const binColorOrder = ["orange", "red", "green", "blue", "purple"];
 const BIN_COUNT = binColorOrder.length;
 
-const targets = {
-  flat: { purple: 20, blue: 20, green: 20, red: 20, orange: 20 },
-  fair: { purple: 28, blue: 23, green: 20, red: 17, orange: 12 },
-  actual: { purple: 50, blue: 23, green: 15, red: 9, orange: 3 },
-};
-
-const modeDescriptions = {
-  flat: "Equal: 20% to each group.",
-  fair: "Fair: moderate inequality.",
-  actual: "Actual U.S.: top group gets half.",
-  free: "Free Play: no target.",
-};
+const target = { purple: 50, blue: 23, green: 15, red: 9, orange: 3 };
 
 const state = {
-  mode: "flat",
   gravity: DEFAULT_GRAVITY,
   spawnPerSec: DEFAULT_SPAWN,
   pegs: [],
@@ -107,7 +93,7 @@ function initBars() {
   barsEl.querySelector("#stackLegend").innerHTML = binColorOrder
     .map(
       (colorId) =>
-        `<span class="legend-item"><span class="swatch" style="background:${colorGroups[colorId].hex}"></span>${colorGroups[colorId].name}</span>`
+        `<span class="legend-item"><span class="swatch" style="background:${colorGroups[colorId].hex}"></span>${colorGroups[colorId].label}</span>`
     )
     .join("");
 
@@ -124,7 +110,7 @@ function renderStackRow(trackEl, valuesByColor, titlePrefix) {
     seg.className = "stack-segment";
     seg.style.width = `${pct}%`;
     seg.style.background = colorGroups[colorId].hex;
-    seg.title = `${titlePrefix} ${colorGroups[colorId].name}: ${pct.toFixed(1)}%`;
+    seg.title = `${titlePrefix} ${colorGroups[colorId].label}: ${pct.toFixed(1)}%`;
     trackEl.appendChild(seg);
   });
 }
@@ -257,14 +243,6 @@ function resetMenuSheetPosition() {
 }
 
 function buildMenuActions(context) {
-  if (context.kind === "mode-select") {
-    return [
-      { id: "mode-flat", label: "Equal (Flat)" },
-      { id: "mode-fair", label: "Fair (Moderate)" },
-      { id: "mode-actual", label: "Actual U.S." },
-      { id: "mode-free", label: "Free Play" },
-    ];
-  }
   if (context.kind === "game-options") {
     return [
       { id: "show-help", label: "Help" },
@@ -292,7 +270,6 @@ function openMenu(context, title, clientX, clientY) {
     button.dataset.action = action.id;
     button.textContent = action.label;
     if (action.id.startsWith("delete")) button.style.background = "#fee2e2";
-    if (action.id === `mode-${state.mode}`) button.classList.add("is-active");
     pressMenuActions.appendChild(button);
   });
 
@@ -331,12 +308,6 @@ function openGameOptionsMenu() {
 function applyMenuAction(actionId) {
   if (!state.menuContext) return;
   const context = state.menuContext;
-
-  if (actionId.startsWith("mode-")) {
-    state.mode = actionId.replace("mode-", "");
-    updateHud();
-    return;
-  }
 
   if (actionId === "show-help") {
     openRulesModal(false);
@@ -537,21 +508,11 @@ function getCurrentByColor() {
 }
 
 function computeMetrics() {
-  const targetByColor = state.mode === "free" ? null : targets[state.mode];
   const currentByColor = getCurrentByColor();
   const windowCount = state.recentBins.length;
 
-  if (!targetByColor) {
-    return {
-      currentByColor,
-      targetByColor: null,
-      score: null,
-      windowCount,
-    };
-  }
-
   const totalAbsError = colorIds.reduce(
-    (sum, colorId) => sum + Math.abs(currentByColor[colorId] - targetByColor[colorId]),
+    (sum, colorId) => sum + Math.abs(currentByColor[colorId] - target[colorId]),
     0
   );
 
@@ -559,7 +520,7 @@ function computeMetrics() {
 
   return {
     currentByColor,
-    targetByColor,
+    targetByColor: target,
     score,
     windowCount,
   };
@@ -567,13 +528,9 @@ function computeMetrics() {
 
 function updateHud() {
   const metrics = computeMetrics();
-  modeDescription.textContent = modeDescriptions[state.mode];
   renderStackRow(state.barRefs.currentTrack, metrics.currentByColor, "Current");
 
-  if (state.mode === "free") {
-    statusText.textContent = `Free Play. Last ${metrics.windowCount} balls.`;
-    statusText.style.color = "#475569";
-  } else if (metrics.score >= 92) {
+  if (metrics.score >= 92) {
     statusText.textContent = `Score: ${metrics.score} -- on target!`;
     statusText.style.color = "#16a34a";
   } else if (metrics.score >= 80) {
@@ -749,12 +706,12 @@ function drawLevers() {
 function drawParticles() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 22px Chivo";
+  ctx.font = "bold 56px Chivo";
   for (const p of state.particles) {
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.fillStyle = "#16a34a";
-    ctx.fillText("$", 0, 1);
+    ctx.fillText("$", 0, 2);
     ctx.restore();
   }
 }
@@ -788,12 +745,12 @@ function closeRulesModal() {
 
 function drawBinStack() {
   const binWidth = W / BIN_COUNT;
-  const spacing = 16;
+  const spacing = 32;
   const cols = Math.floor((binWidth - 8) / spacing);
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 14px Chivo";
+  ctx.font = "bold 30px Chivo";
 
   for (let i = 0; i < BIN_COUNT; i += 1) {
     const count = state.counts[i];
@@ -806,7 +763,7 @@ function drawBinStack() {
       const col = j % cols;
       const row = Math.floor(j / cols);
       const x = binLeft + col * spacing + spacing / 2;
-      const y = H - 8 - row * spacing;
+      const y = H - 14 - row * spacing;
       if (y < H - BIN_HEIGHT + 10) break;
       ctx.fillText("$", x, y);
     }
@@ -946,35 +903,22 @@ canvas.addEventListener("pointerup", onPointerRelease);
 canvas.addEventListener("pointercancel", onPointerRelease);
 canvas.addEventListener("pointerleave", onPointerRelease);
 
-function openModeMenu() {
-  const rect = modeMenuBtn.getBoundingClientRect();
-  const context = { kind: "mode-select" };
-  openMenu(context, "Target Mode", rect.left + rect.width * 0.5, rect.bottom + 4);
-}
-
 function renderPausedStats() {
   const metrics = computeMetrics();
-  const hasTarget = !!metrics.targetByColor;
   let html = '<div class="stats-card">';
   html += '<div class="stats-grid">';
-  html += `<div class="stats-header"><span>Group</span><span>Current</span>${hasTarget ? "<span>Target</span><span>Diff</span>" : ""}</div>`;
+  html += '<div class="stats-header"><span>Quintile</span><span>Current</span><span>Target</span><span>Diff</span></div>';
   binColorOrder.forEach((colorId) => {
     const current = metrics.currentByColor[colorId];
     const swatch = `<span class="swatch" style="background:${colorGroups[colorId].hex}"></span>`;
-    let targetInfo = "";
-    if (hasTarget) {
-      const target = metrics.targetByColor[colorId];
-      const diff = current - target;
-      const sign = diff >= 0 ? "+" : "";
-      const close = Math.abs(diff) < 3;
-      targetInfo = `<span class="stats-target">${target}%</span><span class="stats-diff${close ? " close" : ""}">${sign}${diff.toFixed(1)}</span>`;
-    }
-    html += `<div class="stats-row"><span class="stats-color">${swatch}${colorGroups[colorId].name}</span><span class="stats-current">${current.toFixed(1)}%</span>${targetInfo}</div>`;
+    const t = metrics.targetByColor[colorId];
+    const diff = current - t;
+    const sign = diff >= 0 ? "+" : "";
+    const close = Math.abs(diff) < 3;
+    html += `<div class="stats-row"><span class="stats-color">${swatch}${colorGroups[colorId].label}</span><span class="stats-current">${current.toFixed(1)}%</span><span class="stats-target">${t}%</span><span class="stats-diff${close ? " close" : ""}">${sign}${diff.toFixed(1)}</span></div>`;
   });
   html += "</div>";
-  if (metrics.score !== null) {
-    html += `<p class="stats-score">Score: ${metrics.score}/100</p>`;
-  }
+  html += `<p class="stats-score">Score: ${metrics.score}/100</p>`;
   html += `<p class="stats-note">Based on last ${metrics.windowCount} balls</p>`;
   html += "</div>";
   statsContent.innerHTML = html;
@@ -993,12 +937,6 @@ function togglePause() {
     pausedStats.hidden = true;
   }
 }
-
-modeMenuBtn.addEventListener("click", () => {
-  hidePressMenu();
-  resetMenuSheetPosition();
-  openModeMenu();
-});
 
 pauseBtn.addEventListener("click", togglePause);
 
