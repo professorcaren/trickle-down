@@ -915,8 +915,11 @@ function drawBinStack() {
   ctx.textBaseline = "middle";
   ctx.font = "bold 32px Chivo";
 
+  // Scale visual count so bins start empty and fill as real balls arrive
+  const visualTotal = Math.min(state.totalCaptured, SCORE_WINDOW);
+  const countTotal = state.recentBins.length;
   for (let i = 0; i < BIN_COUNT; i += 1) {
-    const count = state.counts[i];
+    const count = countTotal > 0 ? Math.round(state.counts[i] * visualTotal / countTotal) : 0;
     if (count === 0) continue;
     const colorId = binColorOrder[i];
     ctx.fillStyle = colorGroups[colorId].hex;
