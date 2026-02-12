@@ -449,6 +449,7 @@ function spawnParticle() {
     r: PARTICLE_RADIUS,
     rot: Math.random() * Math.PI * 2,
     rotV: (Math.random() - 0.5) * 3.5,
+    age: 0,
   });
 }
 
@@ -715,6 +716,11 @@ function update(dt) {
   const binWidth = W / BIN_COUNT;
   for (let i = state.particles.length - 1; i >= 0; i -= 1) {
     const p = state.particles[i];
+    p.age += dt;
+    if (p.age > 15) {
+      state.particles.splice(i, 1);
+      continue;
+    }
     p.vy += state.gravity * dt;
     p.vx *= 0.999;
     p.rot += p.rotV * dt;
