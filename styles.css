@@ -384,11 +384,15 @@ h2 {
 .mode-toggle-btn {
   width: 100%;
   margin-top: 0.35rem;
-  background: linear-gradient(110deg, #6366f1, #0ea5e9);
-  color: #fff;
-  font-size: 0.72rem;
-  min-height: 30px;
-  padding: 0.32rem 0.5rem;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.64rem;
+  min-height: 26px;
+  padding: 0.24rem 0.5rem;
+}
+
+.rules-mode-btn {
+  margin-top: 0.5rem;
 }
 
 .stats-score {
@@ -404,7 +408,7 @@ h2 {
 
 @media (min-width: 760px) {
   .layout {
-    width: min(920px, 96vw);
+    width: min(480px, 96vw);
     padding: 0.32rem 0;
   }
 

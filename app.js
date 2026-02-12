@@ -15,6 +15,7 @@ const pressMenuActions = document.getElementById("pressMenuActions");
 const pressMenuCancel = document.getElementById("pressMenuCancel");
 const rulesModal = document.getElementById("rulesModal");
 const rulesCloseBtn = document.getElementById("rulesCloseBtn");
+const modeToggleBtn = document.getElementById("modeToggleBtn");
 
 const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
@@ -537,27 +538,27 @@ function getScoreMessage(score, cur) {
     if (score >= 78) {
       if (topDiff < -5) return "Almost! Even more needs to pool at the very top.";
       if (topDiff > 5) return "Close, but even the top quintile doesn't hoard that much.";
-      if (bottomThree > 12) return "Nearly there \u2014 the bottom 60% owns almost nothing.";
+      if (bottomThree > 12) return "Nearly there \u2014 the bottom gets almost nothing.";
       return "So close! Fine-tune your levers.";
     }
     if (score >= 60) {
-      if (topDiff < -15) return "The top 20% holds 83% of all wealth. Send way more right!";
+      if (topDiff < -15) return "Way more needs to go to the top. Send it right!";
       if (topDiff < -8) return "Not enough pooling at the top \u2014 wealth is super concentrated.";
-      if (bottomThree > 25) return "Bottom 60% owns barely 6% combined. Way too much going there.";
+      if (bottomThree > 25) return "Way too much going to the bottom \u2014 shrink those brackets.";
       if (midDiff > 8) return "The middle class has almost no wealth \u2014 shrink that bracket.";
-      if (cur.orange > 5) return "Bottom 20% owns about 1%. You're being too generous.";
+      if (cur.orange > 5) return "The bottom is getting too much. Way too generous.";
       return "Getting there \u2014 pause and check which brackets are off.";
     }
     if (score >= 40) {
-      if (topDiff < -30) return "83% of wealth goes to the top 20%. That's not a typo.";
+      if (topDiff < -30) return "The top needs way, way more. That's not a joke.";
       if (Math.abs(cur.purple - 20) < 8) return "Way too equal! Wealth is wildly more concentrated than income.";
-      if (bottomHalf > 20) return "Bottom 40% owns about 2% of wealth. Not 20%.";
-      if (cur.orange > 10) return "Bottom 20% owns virtually nothing. Really.";
+      if (bottomHalf > 20) return "The bottom gets almost nothing. Not that much.";
+      if (cur.orange > 10) return "The bottom quintile has virtually nothing. Really.";
       if (cur.purple > 92) return "Even the real numbers aren't quite that extreme!";
       return "Big gaps \u2014 try angling levers to push almost everything right.";
     }
-    if (cur.purple < 40) return "The top quintile needs way more \u2014 think 83%.";
-    if (bottomThree > 40) return "Bottom 60% combined owns 6%. You've given them way too much.";
+    if (cur.purple < 40) return "The top quintile needs way more than that.";
+    if (bottomThree > 40) return "The bottom three quintiles are getting way too much.";
     if (state.levers.length === 0 && state.totalCaptured > 20) return "Try drawing some levers to redirect the flow!";
     return "Wealth is even more lopsided than income \u2014 keep experimenting!";
   }
@@ -566,40 +567,40 @@ function getScoreMessage(score, cur) {
   if (score >= 78) {
     if (topDiff < -5) return "Almost! The top quintile needs a bigger slice.";
     if (topDiff > 5) return "Close, but too much is pooling at the top.";
-    if (bottomDiff > 4) return "The bottom 20% is getting more than reality allows.";
+    if (bottomDiff > 4) return "The bottom is getting more than reality allows.";
     if (midDiff > 4) return "Nearly there \u2014 the middle class is a touch too big.";
-    if (upperDiff > 5) return "The 60-80% bracket is a bit bloated.";
-    if (lowerDiff > 4) return "Trim the 20-40% bracket a little.";
+    if (upperDiff > 5) return "The upper-middle bracket is a bit bloated.";
+    if (lowerDiff > 4) return "Trim the lower-middle bracket a little.";
     return "So close! Fine-tune your levers.";
   }
 
   if (score >= 60) {
-    if (topDiff < -12) return "The top 20% gets over half. Send more right!";
+    if (topDiff < -12) return "The top needs way more. Send it right!";
     if (topDiff < -8) return "Not enough reaching the wealthiest quintile.";
     if (bottomHalf > 30) return "Too much at the bottom \u2014 reality is harsher.";
     if (midDiff > 10) return "Middle class is too big. Sounds nice, but nope.";
     if (topDiff > 10) return "Even the real economy isn't that top-heavy!";
-    if (upperDiff > 10) return "The 60-80% range is grabbing too much.";
-    if (bottomThree > 40) return "Bottom 60% is way over budget.";
+    if (upperDiff > 10) return "The upper-middle range is grabbing too much.";
+    if (bottomThree > 40) return "Bottom three quintiles are way over budget.";
     return "Getting there \u2014 pause and check which quintiles are off.";
   }
 
   if (score >= 40) {
     if (topDiff < -20) return "The rich aren't rich enough yet. Seriously.";
     if (Math.abs(cur.purple - 20) < 5 && Math.abs(cur.orange - 20) < 5) return "Too equal! The real world is way less fair.";
-    if (bottomHalf > 40) return "Way too much going to the bottom 40%.";
+    if (bottomHalf > 40) return "Way too much going to the bottom.";
     if (midDiff > 15) return "That's a massive middle class \u2014 not how it works.";
-    if (cur.orange > 15) return "Bottom 20% getting 15%+? Wishful thinking.";
+    if (cur.orange > 15) return "The bottom is getting way too much. Wishful thinking.";
     if (topHalf > 90) return "Whoa \u2014 you built an oligarchy, not the U.S.";
-    if (cur.purple > 70) return "Top quintile over 70%? Even America isn't there yet.";
+    if (cur.purple > 70) return "Too much at the top \u2014 even America isn't there yet.";
     return "Big gaps \u2014 try angling some levers.";
   }
 
   if (topHalf < 30) return "Almost nothing reaches the top. Funnel it right!";
-  if (bottomHalf > 50) return "Half the income to the bottom 40%? If only.";
-  if (bottomThree > 70) return "70%+ to the bottom three quintiles? That's Sweden's dream.";
-  if (cur.purple < 10) return "Top 20% getting under 10%? That's never happened.";
-  if (cur.orange > 25) return "Bottom quintile at 25%? That's a different country.";
+  if (bottomHalf > 50) return "Way too much to the bottom. If only!";
+  if (bottomThree > 70) return "Bottom three quintiles are way too high. That's a dream.";
+  if (cur.purple < 10) return "Top quintile is way too low. That's never happened.";
+  if (cur.orange > 25) return "Bottom quintile is way too high. Different country!";
   if (state.levers.length === 0 && state.totalCaptured > 20) return "Try drawing some levers to redirect the flow!";
   if (Math.abs(topDiff) < 8 && bottomHalf > 35) return "Top is okay but the bottom gets way too much.";
   return "Wild distribution \u2014 keep experimenting!";
@@ -816,10 +817,16 @@ function setRulesSeen() {
   }
 }
 
+function updateModeToggleLabel() {
+  const otherLabel = state.mode === "income" ? "Wealth" : "Income";
+  modeToggleBtn.textContent = `Switch to ${otherLabel} Mode`;
+}
+
 function openRulesModal(markSeen = false) {
   if (markSeen) setRulesSeen();
   hidePressMenu();
   resetMenuSheetPosition();
+  updateModeToggleLabel();
   rulesModal.hidden = false;
 }
 
@@ -1006,21 +1013,12 @@ function renderPausedStats() {
   html += "</div>";
   html += `<p class="stats-score">Score: ${metrics.score}/100</p>`;
   html += `<p class="stats-note">Based on last ${metrics.windowCount} balls</p>`;
-  const otherMode = state.mode === "income" ? "wealth" : "income";
-  const otherLabel = state.mode === "income" ? "Wealth" : "Income";
-  html += `<button id="modeToggleBtn" class="mode-toggle-btn">Switch to ${otherLabel} Mode</button>`;
   html += '<p class="stats-note"><a href="#" id="statsHelpLink" style="color:#6366f1">How to play</a></p>';
   html += "</div>";
   statsContent.innerHTML = html;
   statsContent.querySelector("#statsHelpLink").addEventListener("click", (e) => {
     e.preventDefault();
     openRulesModal(false);
-  });
-  statsContent.querySelector("#modeToggleBtn").addEventListener("click", () => {
-    state.mode = otherMode;
-    resetCounts();
-    state.particles = [];
-    renderPausedStats();
   });
 }
 
@@ -1070,6 +1068,15 @@ pressMenu.addEventListener("click", (event) => {
 });
 
 rulesCloseBtn.addEventListener("click", () => {
+  closeRulesModal();
+});
+
+modeToggleBtn.addEventListener("click", () => {
+  state.mode = state.mode === "income" ? "wealth" : "income";
+  resetCounts();
+  state.particles = [];
+  updateModeToggleLabel();
+  if (state.paused) renderPausedStats();
   closeRulesModal();
 });
 
